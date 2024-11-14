@@ -25,7 +25,9 @@ export default {
     modalHeaderContent() {
       return this.selectedWaTemplate
         ? this.$t('WHATSAPP_TEMPLATES.MODAL.TEMPLATE_SELECTED_SUBTITLE', {
-            templateName: this.selectedWaTemplate.name,
+            templateName:
+              this.selectedWaTemplate.name ||
+              this.selectedWaTemplate.elementName,
           })
         : this.$t('WHATSAPP_TEMPLATES.MODAL.SUBTITLE');
     },

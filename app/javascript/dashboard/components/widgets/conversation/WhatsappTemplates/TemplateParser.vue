@@ -32,6 +32,9 @@ export default {
     const processedParams = ref({});
 
     const templateString = computed(() => {
+      if ('elementName' in props.template) {
+        return props.template.data;
+      }
       return props.template.components.find(
         component => component.type === 'BODY'
       ).text;
@@ -76,14 +79,17 @@ export default {
     const sendMessage = () => {
       v$.value.$touch();
       if (v$.value.$invalid) return;
-
+      // Here in namesapce we are passing the id, if the req is from Gupshup, which is req in POST REQUEST
+      // Else for normal providers, we will keep the structure intact
       const payload = {
         message: processedString.value,
         templateParams: {
-          name: props.template.name,
+          name: props.template.name || props.template.elementName,
           category: props.template.category,
-          language: props.template.language,
-          namespace: props.template.namespace,
+          language: props.template.language || props.template.languageCode,
+          namespace: props.template.elementName
+            ? props.template.id
+            : props.template.namespace,
           processed_params: processedParams.value,
         },
       };

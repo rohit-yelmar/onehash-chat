@@ -892,7 +892,7 @@ DEPENDENCIES
   annotate
   attr_extras
   audited (~> 5.4, >= 5.4.1)
-  aws-sdk-s3
+  aws-sdk-s3 (~> 1.96)
   azure-storage-blob!
   barnes
   bootsnap

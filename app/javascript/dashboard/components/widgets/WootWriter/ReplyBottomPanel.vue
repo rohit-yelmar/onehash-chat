@@ -94,7 +94,7 @@ export default {
     },
     hasWhatsappTemplates: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     conversationId: {
       type: Number,

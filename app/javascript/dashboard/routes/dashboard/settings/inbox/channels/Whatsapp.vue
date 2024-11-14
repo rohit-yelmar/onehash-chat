@@ -3,6 +3,7 @@ import PageHeader from '../../SettingsSubPageHeader.vue';
 import Twilio from './Twilio.vue';
 import ThreeSixtyDialogWhatsapp from './360DialogWhatsapp.vue';
 import CloudWhatsapp from './CloudWhatsapp.vue';
+import GupshupWhatsapp from './GupshupWhatsapp.vue'; // Import the new Gupshup component
 
 export default {
   components: {
@@ -10,10 +11,11 @@ export default {
     Twilio,
     ThreeSixtyDialogWhatsapp,
     CloudWhatsapp,
+    GupshupWhatsapp, // Register the new Gupshup component
   },
   data() {
     return {
-      provider: 'whatsapp_cloud',
+      provider: 'whatsapp_cloud', // Default provider remains the same
     };
   },
 };
@@ -37,12 +39,18 @@ export default {
           <option value="twilio">
             {{ $t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.TWILIO') }}
           </option>
+          <option value="gupshup">
+            <!-- Add Gupshup option -->
+            {{ $t('INBOX_MGMT.ADD.WHATSAPP.PROVIDERS.GUPSHUP') }}
+          </option>
         </select>
       </label>
     </div>
 
     <Twilio v-if="provider === 'twilio'" type="whatsapp" />
     <ThreeSixtyDialogWhatsapp v-else-if="provider === '360dialog'" />
-    <CloudWhatsapp v-else />
+    <CloudWhatsapp v-else-if="provider === 'whatsapp_cloud'" />
+    <GupshupWhatsapp v-else />
+    <!-- Render Gupshup component when selected -->
   </div>
 </template>

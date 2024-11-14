@@ -64,15 +64,22 @@ export const getters = {
     const messagesTemplates =
       whatsAppMessageTemplates || apiInboxMessageTemplates;
 
-    // filtering out the whatsapp templates with media
-    if (messagesTemplates instanceof Array) {
-      return messagesTemplates.filter(template => {
-        return !template.components.some(
-          i => i.format === 'IMAGE' || i.format === 'VIDEO'
-        );
-      });
+    const actualTemplates = Array.isArray(messagesTemplates?.templates)
+      ? messagesTemplates.templates
+      : messagesTemplates;
+
+    if (inbox?.provider === 'gupshup') {
+      // Return actual templates for Gupshup
+      return actualTemplates;
     }
-    return [];
+    // Filter out templates with media formats for other providers
+    const filteredTemplates = messagesTemplates.filter(template => {
+      return !template.components.some(
+        i => i.format === 'IMAGE' || i.format === 'VIDEO'
+      );
+    });
+
+    return filteredTemplates;
   },
   getNewConversationInboxes($state) {
     return $state.records.filter(inbox => {

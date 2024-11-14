@@ -218,7 +218,8 @@
           "LABEL": "API Provider",
           "TWILIO": "Twilio",
           "WHATSAPP_CLOUD": "WhatsApp Cloud",
-          "360_DIALOG": "360Dialog"
+          "360_DIALOG": "360Dialog",
+          "GUPSHUP": "Gupshup"
         },
         "INBOX_NAME": {
           "LABEL": "Inbox Name",
@@ -229,6 +230,16 @@
           "LABEL": "Phone number",
           "PLACEHOLDER": "Please enter the phone number from which message will be sent.",
           "ERROR": "Please provide a valid phone number that starts with a `+` sign and does not contain any spaces."
+        },
+        "APP_ID": {
+          "LABEL": "App ID",
+          "PLACEHOLDER": "Please enter the App ID obtained from Gupshup.",
+          "ERROR": "Please enter a valid value."
+        },
+        "APP_NAME": {
+          "LABEL": "App Name",
+          "PLACEHOLDER": "Please enter the App Name registered on Gupshup.",
+          "ERROR": "Please enter a valid value."
         },
         "PHONE_NUMBER_ID": {
           "LABEL": "Phone number ID",

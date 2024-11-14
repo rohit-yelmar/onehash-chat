@@ -29,6 +29,12 @@ export default {
         this.currentInbox.provider === 'whatsapp_cloud'
       );
     },
+    isGupshupInbox() {
+      return (
+        this.currentInbox.channel_type === 'Channel::Whatsapp' &&
+        this.currentInbox.provider === 'gupshup'
+      );
+    },
     message() {
       if (this.isATwilioInbox) {
         return `${this.$t('INBOX_MGMT.FINISH.MESSAGE')}. ${this.$t(
@@ -49,6 +55,12 @@ export default {
       }
 
       if (this.isWhatsAppCloudInbox) {
+        return `${this.$t('INBOX_MGMT.FINISH.MESSAGE')}. ${this.$t(
+          'INBOX_MGMT.ADD.WHATSAPP.API_CALLBACK.SUBTITLE'
+        )}`;
+      }
+
+      if (this.isGupshupInbox) {
         return `${this.$t('INBOX_MGMT.FINISH.MESSAGE')}. ${this.$t(
           'INBOX_MGMT.ADD.WHATSAPP.API_CALLBACK.SUBTITLE'
         )}`;
@@ -92,6 +104,23 @@ export default {
           />
         </div>
         <div v-if="isWhatsAppCloudInbox" class="w-[50%] max-w-[50%] ml-[25%]">
+          <p class="mt-8 font-medium text-slate-700 dark:text-slate-200">
+            {{ $t('INBOX_MGMT.ADD.WHATSAPP.API_CALLBACK.WEBHOOK_URL') }}
+          </p>
+          <woot-code lang="html" :script="currentInbox.callback_webhook_url" />
+          <p class="mt-8 font-medium text-slate-700 dark:text-slate-200">
+            {{
+              $t(
+                'INBOX_MGMT.ADD.WHATSAPP.API_CALLBACK.WEBHOOK_VERIFICATION_TOKEN'
+              )
+            }}
+          </p>
+          <woot-code
+            lang="html"
+            :script="currentInbox.provider_config.webhook_verify_token"
+          />
+        </div>
+        <div v-if="isGupshupInbox" class="w-[50%] max-w-[50%] ml-[25%]">
           <p class="mt-8 font-medium text-slate-700 dark:text-slate-200">
             {{ $t('INBOX_MGMT.ADD.WHATSAPP.API_CALLBACK.WEBHOOK_URL') }}
           </p>

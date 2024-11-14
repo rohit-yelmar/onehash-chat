@@ -30,6 +30,8 @@ Rails.application.configure do
   config.public_file_server.enabled = true
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
+  # Set up ActiveStorage to use Ngrok URL for public file access
+  #Rails.application.routes.default_url_options = {host : 'https://1348-2401-4900-1c55-7420-bcd3-2127-d2b8-d1c.ngrok-free.app'}
   config.active_storage.service = ENV.fetch('ACTIVE_STORAGE_SERVICE', 'local').to_sym
 
   config.active_job.queue_adapter = :sidekiq

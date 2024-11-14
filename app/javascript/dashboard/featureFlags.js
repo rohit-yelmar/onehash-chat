@@ -31,5 +31,6 @@ export const FEATURE_FLAGS = {
   INBOUND_EMAILS: 'inbound_emails',
   IP_LOOKUP: 'ip_lookup',
   LINEAR: 'linear_integration',
+  WHATSAPP_TEMPLATES: 'whatsapp_templates',
   CAPTAIN: 'captain_integration',
 };

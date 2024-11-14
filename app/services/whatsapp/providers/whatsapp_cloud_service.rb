@@ -113,6 +113,7 @@ class Whatsapp::Providers::WhatsappCloudService < Whatsapp::Providers::BaseServi
 
   def process_response(response)
     if response.success?
+
       response['messages'].first['id']
     else
       Rails.logger.error response.body

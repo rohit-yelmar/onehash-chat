@@ -1,6 +1,6 @@
 <script>
 // TODO: Remove this when we support all formats
-const formatsToRemove = ['DOCUMENT', 'IMAGE', 'VIDEO'];
+// const formatsToRemove = ['DOCUMENT', 'IMAGE', 'VIDEO'];
 
 export default {
   props: {
@@ -17,23 +17,34 @@ export default {
   computed: {
     whatsAppTemplateMessages() {
       // TODO: Remove the last filter when we support all formats
-      return this.$store.getters['inboxes/getWhatsAppTemplates'](this.inboxId)
-        .filter(template => template.status.toLowerCase() === 'approved')
-        .filter(template => {
-          return template.components.every(component => {
-            return !formatsToRemove.includes(component.format);
-          });
-        });
+
+      return this.$store.getters['inboxes/getWhatsAppTemplates'](
+        this.inboxId
+      ).filter(template => template.status?.toLowerCase() === 'approved');
     },
     filteredTemplateMessages() {
+      if (
+        this.$store.getters['inboxes/getInbox'](this.inboxId)?.provider ===
+        'gupshup'
+      ) {
+        return this.whatsAppTemplateMessages.filter(template =>
+          template.elementName?.toLowerCase().includes(this.query.toLowerCase())
+        );
+      }
       return this.whatsAppTemplateMessages.filter(template =>
-        template.name.toLowerCase().includes(this.query.toLowerCase())
+        template.name?.toLowerCase().includes(this.query.toLowerCase())
       );
     },
   },
   methods: {
     getTemplatebody(template) {
-      return template.components.find(component => component.type === 'BODY')
+      if (
+        this.$store.getters['inboxes/getInbox'](this.inboxId)?.provider ===
+        'gupshup'
+      ) {
+        return template.data;
+      }
+      return template.components?.find(component => component.type === 'BODY')
         .text;
     },
   },
@@ -60,13 +71,13 @@ export default {
           <div>
             <div class="flex items-center justify-between mb-2.5">
               <p class="label-title">
-                {{ template.name }}
+                {{ template.name || template.elementName }}
               </p>
               <span
                 class="inline-block px-2 py-1 text-xs leading-none bg-white rounded-sm cursor-default dark:bg-slate-700 text-slate-800 dark:text-slate-100"
               >
                 {{ $t('WHATSAPP_TEMPLATES.PICKER.LABELS.LANGUAGE') }} :
-                {{ template.language }}
+                {{ template.language || template.languageCode }}
               </span>
             </div>
             <div>

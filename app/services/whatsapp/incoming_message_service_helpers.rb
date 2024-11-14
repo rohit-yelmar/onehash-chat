@@ -12,7 +12,7 @@ module Whatsapp::IncomingMessageServiceHelpers
     }
   end
 
-  def processed_params
+  def processed_params 
     @processed_params ||= params
   end
 
@@ -88,7 +88,26 @@ module Whatsapp::IncomingMessageServiceHelpers
   end
 
   def process_in_reply_to(message)
-    @in_reply_to_external_id = message['context']&.[]('id')
+    if message[:context]&.key?('gsId')
+      # Gupshup-specific context
+      if message[:type]=='sent'
+        external_id = message[:message_id]
+      else
+        external_id = message[:context]['gsId']
+      end
+      
+      
+      @in_reply_to_external_id = external_id
+      
+      @in_reply_to_external_id
+
+    elsif message['context']&.[]('id')
+      # WhatsApp Cloud context
+      @in_reply_to_external_id = message['context']&.[]('id')
+    else
+      # No reply context available
+      @in_reply_to_external_id = nil
+    end
   end
 
   def find_message_by_source_id(source_id)
@@ -103,14 +122,30 @@ module Whatsapp::IncomingMessageServiceHelpers
   end
 
   def cache_message_source_id_in_redis
-    return if @processed_params.try(:[], :messages).blank?
-
-    key = format(Redis::RedisKeys::MESSAGE_SOURCE_KEY, id: @processed_params[:messages].first[:id])
+    message_id = if @processed_params.key?(:message_id)
+                   @processed_params[:message_id]
+                 else
+                   @processed_params[:messages]&.first[:id]
+                 end
+    return if message_id.blank?
+  
+    # Format the Redis key and set it with expiration
+    key = format(Redis::RedisKeys::MESSAGE_SOURCE_KEY, id: message_id)
     ::Redis::Alfred.setex(key, true)
   end
+  
 
   def clear_message_source_id_from_redis
-    key = format(Redis::RedisKeys::MESSAGE_SOURCE_KEY, id: @processed_params[:messages].first[:id])
+    message_id = if @processed_params.key?(:message_id)
+                   @processed_params[:message_id] 
+                 else
+                   @processed_params[:messages]&.first[:id] 
+                 end
+  
+    return unless message_id
+  
+    key = format(Redis::RedisKeys::MESSAGE_SOURCE_KEY, id: message_id)
     ::Redis::Alfred.delete(key)
   end
+  
 end

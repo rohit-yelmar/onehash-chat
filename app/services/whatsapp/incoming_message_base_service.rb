@@ -7,11 +7,10 @@ class Whatsapp::IncomingMessageBaseService
   pattr_initialize [:inbox!, :params!]
 
   def perform
-    
     @processed_params = processed_params
-    
+
     if processed_params.key?(:message_id) && processed_params.key?(:content)
-      
+
       process_gupshup_messages
     elsif processed_params.try(:[], :messages).present?
       process_messages
@@ -24,27 +23,21 @@ class Whatsapp::IncomingMessageBaseService
 
   def process_gupshup_messages
     return if unprocessable_message_type?(processed_params[:message_type])
-    
 
     # Ensure no duplicate messages are processed
     return if find_message_by_source_id(processed_params[:message_id])
-    
 
     cache_message_source_id_in_redis
-    
 
     set_contact_for_gupshup
-    
+
     return unless @contact
-    
+
     set_conversation
-    
 
     create_gupshup_messages
-    
 
     clear_message_source_id_from_redis
-    
   end
 
   def create_gupshup_messages
@@ -58,25 +51,21 @@ class Whatsapp::IncomingMessageBaseService
 
   def create_regular_gupshup_message(message)
     create_message_for_gupshup(message)
-    
-    
+
     message[:message_type] == 'location' ? attach_location_for_gupshup : attach_files_for_gupshup
     @message.save!
   end
 
-def create_message_for_gupshup(message)
+  def create_message_for_gupshup(message)
     # Extract fields specifically for Gupshup payload structure
-    
-    content = message[:content][:text] || "Attachment"
-    source_id = message[:message_id] || "No message ID"
-    
+
+    content = message[:content][:text] || 'Attachment'
+    source_id = message[:message_id] || 'No message ID'
+
     payload = message[:payload]
 
-    if message[:type] == "sent" || message[:type] == "read"
-      source_id = payload[:gsId]
-    end
+    source_id = payload[:gsId] if message[:type] == 'sent' || message[:type] == 'read'
 
-    
     @message = @conversation.messages.build(
       content: content,
       account_id: @inbox.account_id,
@@ -86,76 +75,72 @@ def create_message_for_gupshup(message)
       source_id: source_id.to_s,
       in_reply_to_external_id: @in_reply_to_external_id
     )
-end
-
-def attach_location_for_gupshup
-  location = @processed_params[:content]
-  location_name = 'Location' #Dummy Name
-  type = file_content_type(processed_params[:message_type])
-  @message.attachments.new(
-    account_id: @message.account_id,
-    file_type: type,
-    coordinates_lat: location[:latitude],
-    coordinates_long: location[:longitude],
-    fallback_title: location_name,
-    external_url: 'Dummy_url' #Dummy_url
-  )
-end
-
-def attach_files_for_gupshup
-  # Return early if the message type doesn't involve an attachment
-  return if %w[text button interactive location contacts].include?(processed_params[:message_type])
-  attachment_payload = processed_params
-
-  # Set the message content if there is a caption in the payload
-  @message.content ||= attachment_payload[:content][:caption] if attachment_payload[:content][:caption].present?
-  
-
-  # Check if the content has a valid URL for the attachment
-  attachment_url = attachment_payload.dig(:content, :url)
-  unless attachment_url.present? && attachment_url =~ URI::DEFAULT_PARSER.make_regexp
-    return
   end
 
-  # Download the file from the attachment URL
-  attachment_file = download_attachment_file(attachment_payload[:content])
-  
-  return if attachment_file.blank?
+  def attach_location_for_gupshup
+    location = @processed_params[:content]
+    location_name = 'Location' # Dummy Name
+    type = file_content_type(processed_params[:message_type])
+    @message.attachments.new(
+      account_id: @message.account_id,
+      file_type: type,
+      coordinates_lat: location[:latitude],
+      coordinates_long: location[:longitude],
+      fallback_title: location_name,
+      external_url: 'Dummy_url' # Dummy_url
+    )
+  end
 
-  type = file_content_type(attachment_payload[:message_type])
-  
-  # Attach the downloaded file to the message
+  def attach_files_for_gupshup
+    # Return early if the message type doesn't involve an attachment
+    return if %w[text button interactive location contacts].include?(processed_params[:message_type])
 
-  @message.attachments.new(
-    account_id: @message.account_id,
-    file_type: type,
-    file: {
-      io: attachment_file,
-      filename: attachment_payload[:content][:caption] || "unknown.jpg", # Fallback filename
-      content_type: attachment_payload[:content][:contentType] || "image/jpeg" # Fallback content type
-    }
-  )
-end
+    attachment_payload = processed_params
 
+    # Set the message content if there is a caption in the payload
+    @message.content ||= attachment_payload[:content][:caption] if attachment_payload[:content][:caption].present?
+
+    # Check if the content has a valid URL for the attachment
+    attachment_url = attachment_payload.dig(:content, :url)
+    return unless attachment_url.present? && attachment_url =~ URI::DEFAULT_PARSER.make_regexp
+
+    # Download the file from the attachment URL
+    attachment_file = download_attachment_file(attachment_payload[:content])
+
+    return if attachment_file.blank?
+
+    type = file_content_type(attachment_payload[:message_type])
+
+    # Attach the downloaded file to the message
+
+    @message.attachments.new(
+      account_id: @message.account_id,
+      file_type: type,
+      file: {
+        io: attachment_file,
+        filename: attachment_payload[:content][:caption] || 'unknown.jpg', # Fallback filename
+        content_type: attachment_payload[:content][:contentType] || 'image/jpeg' # Fallback content type
+      }
+    )
+  end
 
   def set_contact_for_gupshup
     # identifier = processed_params[:context]['gsId']
     # identifier = identifier.to_s.gsub(/\D/, '').slice(0, 15)
     # Rails.logger.info("Identifier for Gupshup: #{identifier}")
 
-  # Strip out any non-numeric characters if necessary
-  source_number = if processed_params[:source].present?
-                    CUSTOM_LOGGER.info("Using :source")
-                    processed_params[:source].gsub(/\D/, '') || processed_params[:sender]['phone']
-                  else
-                    CUSTOM_LOGGER.info("Using destination")
-                    processed_params.dig(:payload, 'destination').to_s.gsub(/\D/, '')
-                  end
+    # Strip out any non-numeric characters if necessary
+    source_number = if processed_params[:source].present?
+                      CUSTOM_LOGGER.info('Using :source')
+                      processed_params[:source].gsub(/\D/, '') || processed_params[:sender]['phone']
+                    else
+                      CUSTOM_LOGGER.info('Using destination')
+                      processed_params.dig(:payload, 'destination').to_s.gsub(/\D/, '')
+                    end
 
-  # Use dig to safely access the name or fallback to 'unknown'
-  source_name = processed_params.dig(:sender, 'name') || 'unknown'
-  
-  
+    # Use dig to safely access the name or fallback to 'unknown'
+    source_name = processed_params.dig(:sender, 'name') || 'unknown'
+
     contact_inbox = ::ContactInboxWithContactBuilder.new(
       source_id: source_number,
       inbox: inbox,
@@ -165,9 +150,6 @@ end
     @contact_inbox = contact_inbox
     @contact = contact_inbox.contact
   end
-
-
-
 
   def process_messages
     # We don't support reactions & ephemeral message now, we need to skip processing the message
@@ -215,8 +197,6 @@ end
   end
 
   def create_message(message)
-    
-
     @message = @conversation.messages.build(
       content: message_content(message),
       account_id: @inbox.account_id,
@@ -267,9 +247,9 @@ end
                       @contact_inbox.conversations
                                     .where.not(status: :resolved).last
                     end
-  
+
     return if @conversation
-    
+
     @conversation = ::Conversation.create!(conversation_params)
   end
 

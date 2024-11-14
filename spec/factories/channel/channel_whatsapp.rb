@@ -45,17 +45,17 @@ FactoryBot.define do
       channel_whatsapp.define_singleton_method(:validate_provider_config) { nil } unless options.validate_provider_config
       case channel_whatsapp.provider
       when 'whatsapp_cloud'
-        channel_whatsapp.provider_config = channel_whatsapp.provider_config.merge({ 
-          'api_key' => 'test_key', 
-          'phone_number_id' => '123456789',
-          'business_account_id' => '123456789' 
-        })
+        channel_whatsapp.provider_config = channel_whatsapp.provider_config.merge({
+                                                                                    'api_key' => 'test_key',
+                                                                                    'phone_number_id' => '123456789',
+                                                                                    'business_account_id' => '123456789'
+                                                                                  })
       when 'gupshup'
-        channel_whatsapp.provider_config = channel_whatsapp.provider_config.merge({ 
-          'api_key' => 'gupshup_test_key', 
-          'app_id' => 'gupshup_app_id',
-          'app_name' => 'gupshup_app_name'
-        })
+        channel_whatsapp.provider_config = channel_whatsapp.provider_config.merge({
+                                                                                    'api_key' => 'gupshup_test_key',
+                                                                                    'app_id' => 'gupshup_app_id',
+                                                                                    'app_name' => 'gupshup_app_name'
+                                                                                  })
       end
     end
 

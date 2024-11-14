@@ -8,7 +8,5 @@ class Api::V1::Accounts::UploadController < Api::V1::Accounts::BaseController
     )
     file_blob.save!
     response_data = { file_url: url_for(file_blob), blob_key: file_blob.key, blob_id: file_blob.id }
-    
   end
 end
- 

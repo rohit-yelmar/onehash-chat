@@ -3,8 +3,9 @@ class Webhooks::WhatsappEventsJob < ApplicationJob
 
   def perform(params = {})
     channel = find_channel_from_payload(params)
-  
+
     return if channel_is_inactive?(channel)
+
     case channel.provider
     when 'whatsapp_cloud'
       Whatsapp::IncomingMessageWhatsappCloudService.new(inbox: channel.inbox, params: params).perform
@@ -38,16 +39,13 @@ class Webhooks::WhatsappEventsJob < ApplicationJob
   def gupshup_payload?(params)
     # flag = params.dig(:payload, :context, :gsId).present?
     # Rails.logger.info("Chal raha hai kya:#{flag}")
-    flag = params[:payload]&.key?('id')
-    return flag
+    params[:payload]&.key?('id')
   end
 
   # Method for finding channel using Gupshup payload
   def find_channel_from_gupshup_payload(params)
-    app_name = params[:app]  # Extract the app name to identify the channel
-    channel = Channel::Whatsapp.where(provider: 'gupshup').where("provider_config->>'app_name' = ?", app_name).first
-
-    channel
+    app_name = params[:app] # Extract the app name to identify the channel
+    Channel::Whatsapp.where(provider: 'gupshup').where("provider_config->>'app_name' = ?", app_name).first
   end
 
   # Method for finding channel using WhatsApp Cloud payload

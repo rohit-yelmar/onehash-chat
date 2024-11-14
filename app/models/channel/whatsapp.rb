@@ -67,7 +67,7 @@ class Channel::Whatsapp < ApplicationRecord
   delegate :api_headers, to: :provider_service
 
   private
- 
+
   def ensure_webhook_verify_token
     provider_config['webhook_verify_token'] ||= SecureRandom.hex(16)
   end
@@ -76,4 +76,3 @@ class Channel::Whatsapp < ApplicationRecord
     errors.add(:provider_config, 'Invalid Credentials') unless provider_service.validate_provider_config?
   end
 end
-

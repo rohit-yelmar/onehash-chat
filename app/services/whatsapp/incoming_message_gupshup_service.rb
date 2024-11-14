@@ -9,7 +9,7 @@ class Whatsapp::IncomingMessageGupshupService < Whatsapp::IncomingMessageBaseSer
     payload = params[:payload]
     # CUSTOM_LOGGER.info("Processed Params:#{payload}")
 
-    { 
+    {
       payload: payload,
       message_id: payload[:id], # WhatsApp message ID
       source: payload[:source] || params[:phone_number], # Sender's phone number
@@ -38,22 +38,21 @@ class Whatsapp::IncomingMessageGupshupService < Whatsapp::IncomingMessageBaseSer
   def download_attachment_file(attachment_payload)
     attachment_url = attachment_payload[:url]
     url = URI(attachment_url)
-  
+
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
-  
+
     request = Net::HTTP::Get.new(url)
     request['Authorization'] = "Bearer #{inbox.channel.provider_config['api_key']}"
-  
+
     response = http.request(request)
-  
+
     if response.code == '200'
-      Rails.logger.info("Image response received successfully.")
+      Rails.logger.info('Image response received successfully.')
       Down.download(attachment_url)
     else
       Rails.logger.error("Failed to download attachment. Invalid content type or error in response: #{response.body}")
       nil
     end
   end
-  
 end

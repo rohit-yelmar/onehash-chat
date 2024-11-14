@@ -11,15 +11,15 @@ RSpec.describe Whatsapp::Providers::GupshupService do
   describe '#send_message' do
     context 'when sending a text message' do
       it 'sends a text message to the correct Gupshup API endpoint' do
-        stub_request(:post, "https://api.gupshup.io/wa/api/v1/msg")
+        stub_request(:post, 'https://api.gupshup.io/wa/api/v1/msg')
           .with(
             headers: { 'Content-Type' => 'application/x-www-form-urlencoded', 'apikey' => api_key },
             body: hash_including({
-              channel: 'whatsapp',
-              source: source,
-              destination: phone_number,
-              message: { type: 'text', text: 'Hello World' }.to_json
-            })
+                                   channel: 'whatsapp',
+                                   source: source,
+                                   destination: phone_number,
+                                   message: { type: 'text', text: 'Hello World' }.to_json
+                                 })
           )
           .to_return(status: 200, body: { messageId: '123' }.to_json)
 
@@ -32,20 +32,20 @@ RSpec.describe Whatsapp::Providers::GupshupService do
       let(:message_with_attachment) { create(:message, attachments: [attachment], content: 'Check this image') }
 
       it 'sends an image attachment message to the correct Gupshup API endpoint' do
-        stub_request(:post, "https://api.gupshup.io/wa/api/v1/msg")
+        stub_request(:post, 'https://api.gupshup.io/wa/api/v1/msg')
           .with(
             headers: { 'Content-Type' => 'application/x-www-form-urlencoded', 'apikey' => api_key },
             body: hash_including({
-              channel: 'whatsapp',
-              source: source,
-              destination: phone_number,
-              message: {
-                type: 'image',
-                originalUrl: 'https://example.com/image.jpg',
-                previewUrl: 'https://example.com/image.jpg',
-                caption: 'Check this image'
-              }.to_json
-            })
+                                   channel: 'whatsapp',
+                                   source: source,
+                                   destination: phone_number,
+                                   message: {
+                                     type: 'image',
+                                     originalUrl: 'https://example.com/image.jpg',
+                                     previewUrl: 'https://example.com/image.jpg',
+                                     caption: 'Check this image'
+                                   }.to_json
+                                 })
           )
           .to_return(status: 200, body: { messageId: '456' }.to_json)
 
@@ -57,18 +57,18 @@ RSpec.describe Whatsapp::Providers::GupshupService do
       let(:interactive_message) { create(:message, content_type: 'input_select', content: 'Choose an option') }
 
       it 'sends an interactive message to the correct Gupshup API endpoint' do
-        stub_request(:post, "https://api.gupshup.io/wa/api/v1/msg")
+        stub_request(:post, 'https://api.gupshup.io/wa/api/v1/msg')
           .with(
             headers: { 'Content-Type' => 'application/x-www-form-urlencoded', 'apikey' => api_key },
             body: hash_including({
-              channel: 'whatsapp',
-              source: source,
-              destination: phone_number,
-              message: {
-                type: 'interactive',
-                interactive: an_instance_of(Hash) # Adjust as per your payload structure
-              }.to_json
-            })
+                                   channel: 'whatsapp',
+                                   source: source,
+                                   destination: phone_number,
+                                   message: {
+                                     type: 'interactive',
+                                     interactive: an_instance_of(Hash) # Adjust as per your payload structure
+                                   }.to_json
+                                 })
           )
           .to_return(status: 200, body: { messageId: '789' }.to_json)
 
@@ -108,15 +108,15 @@ RSpec.describe Whatsapp::Providers::GupshupService do
 
   describe '#send_text_message' do
     it 'sends a text message correctly' do
-      stub_request(:post, "https://api.gupshup.io/wa/api/v1/msg")
+      stub_request(:post, 'https://api.gupshup.io/wa/api/v1/msg')
         .with(
           headers: { 'Content-Type' => 'application/x-www-form-urlencoded', 'apikey' => api_key },
           body: hash_including({
-            channel: 'whatsapp',
-            source: source,
-            destination: phone_number,
-            message: { type: 'text', text: 'Hello World' }.to_json
-          })
+                                 channel: 'whatsapp',
+                                 source: source,
+                                 destination: phone_number,
+                                 message: { type: 'text', text: 'Hello World' }.to_json
+                               })
         )
         .to_return(status: 200, body: { messageId: '123' }.to_json)
 
@@ -124,7 +124,7 @@ RSpec.describe Whatsapp::Providers::GupshupService do
     end
 
     it 'logs an error if sending a message fails' do
-      stub_request(:post, "https://api.gupshup.io/wa/api/v1/msg")
+      stub_request(:post, 'https://api.gupshup.io/wa/api/v1/msg')
         .with(
           headers: { 'Content-Type' => 'application/x-www-form-urlencoded', 'apikey' => api_key }
         )
@@ -141,20 +141,20 @@ RSpec.describe Whatsapp::Providers::GupshupService do
     let(:message_with_attachment) { create(:message, attachments: [attachment], content: 'Check this image') }
 
     it 'sends an attachment message correctly' do
-      stub_request(:post, "https://api.gupshup.io/wa/api/v1/msg")
+      stub_request(:post, 'https://api.gupshup.io/wa/api/v1/msg')
         .with(
           headers: { 'Content-Type' => 'application/x-www-form-urlencoded', 'apikey' => api_key },
           body: hash_including({
-            channel: 'whatsapp',
-            source: source,
-            destination: phone_number,
-            message: {
-              type: 'image',
-              originalUrl: 'https://example.com/image.jpg',
-              previewUrl: 'https://example.com/image.jpg',
-              caption: 'Check this image'
-            }.to_json
-          })
+                                 channel: 'whatsapp',
+                                 source: source,
+                                 destination: phone_number,
+                                 message: {
+                                   type: 'image',
+                                   originalUrl: 'https://example.com/image.jpg',
+                                   previewUrl: 'https://example.com/image.jpg',
+                                   caption: 'Check this image'
+                                 }.to_json
+                               })
         )
         .to_return(status: 200, body: { messageId: '456' }.to_json)
 

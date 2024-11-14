@@ -2,18 +2,18 @@ require 'uri'
 require 'net/http'
 
 class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
-  GUPSHUP_API_URL = "https://api.gupshup.io/wa/api/v1/msg"
-  GUPSHUP_API_TEMPLATE_URL = "https://api.gupshup.io/wa/api/v1/template/msg"
+  GUPSHUP_API_URL = 'https://api.gupshup.io/wa/api/v1/msg'
+  GUPSHUP_API_TEMPLATE_URL = 'https://api.gupshup.io/wa/api/v1/template/msg'
 
   def send_message(phone_number, message)
     if message.attachments.present?
-      Rails.logger.info("Attachment present")
+      Rails.logger.info('Attachment present')
       send_attachment_message(phone_number, message)
     elsif message.content_type == 'input_select'
       send_interactive_text_message(phone_number, message)
     else
       Rails.logger.info("Message #{message} Number: #{phone_number}")
-      Rails.logger.info("Plain message Gaya")
+      Rails.logger.info('Plain message Gaya')
       send_text_message(phone_number, message)
     end
   end
@@ -22,23 +22,22 @@ class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
     uri = URI(GUPSHUP_API_TEMPLATE_URL)
     request = Net::HTTP::Post.new(uri)
 
-    request["content-type"] = 'application/x-www-form-urlencoded'
-    request["apikey"] = whatsapp_channel.provider_config['api_key']
+    request['content-type'] = 'application/x-www-form-urlencoded'
+    request['apikey'] = whatsapp_channel.provider_config['api_key']
     text_parameters = template_info[:parameters].map { |param| param[:text] }
     source_number = whatsapp_channel.provider_config['source'].gsub(/\D/, '')
-    temp =  {
+    temp = {
       id: template_info[:namespace],  # Assuming template_info contains the template ID as `id`
       params: text_parameters # Assuming `parameters` is already an array of strings
-      }.to_json
+    }.to_json
 
     request.body = URI.encode_www_form({
-      channel: 'whatsapp',
-      source: source_number,
-      destination: phone_number,
-      "src.name": whatsapp_channel.provider_config['app_name'],
-      template: temp
-    })
-
+                                         channel: 'whatsapp',
+                                         source: source_number,
+                                         destination: phone_number,
+                                         'src.name': whatsapp_channel.provider_config['app_name'],
+                                         template: temp
+                                       })
 
     process_request(uri, request)
   end
@@ -46,21 +45,21 @@ class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
   def sync_templates
     app_id = whatsapp_channel.provider_config['app_id']
     api_key = whatsapp_channel.provider_config['api_key']
-    CUSTOM_LOGGER.info("Syncing templates")
+    CUSTOM_LOGGER.info('Syncing templates')
     # Construct the URL for fetching all templates
     url = URI("https://api.gupshup.io/wa/app/#{app_id}/template")
-  
+
     # Create the HTTP request
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
-  
+
     request = Net::HTTP::Get.new(url)
-    request["accept"] = 'application/json'
-    request["apikey"] = api_key
-  
+    request['accept'] = 'application/json'
+    request['apikey'] = api_key
+
     # Execute the request
     response = http.request(request)
-  
+
     if response.code.to_i == 200
       templates = JSON.parse(response.body)
       if templates.present?
@@ -77,8 +76,6 @@ class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
       CUSTOM_LOGGER.info("Failed to sync templates: #{response.body}")
     end
   end
-  
-  
 
   def validate_provider_config?
     # You can implement Gupshup's equivalent of validating the config, if available
@@ -88,26 +85,26 @@ class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
   def send_text_message(phone_number, message)
     uri = URI(GUPSHUP_API_URL)
     request = Net::HTTP::Post.new(uri)
-    request["Content-Type"] = 'application/x-www-form-urlencoded'
-    request["apikey"] = whatsapp_channel.provider_config['api_key']
+    request['Content-Type'] = 'application/x-www-form-urlencoded'
+    request['apikey'] = whatsapp_channel.provider_config['api_key']
     Rails.logger.info("APIKEY: #{whatsapp_channel.provider_config['api_key']}")
     Rails.logger.info("Config bhi set ho gya: #{message.content}")
     source_number = whatsapp_channel.provider_config['source'].gsub(/\D/, '') # Removes non-numeric characters
-  source_number = "#{source_number}" # Prefix '91' and ensure it's the last 10 digits
+    source_number = "#{source_number}" # Prefix '91' and ensure it's the last 10 digits
 
     Rails.logger.info("Source No: #{source_number} App Name: #{whatsapp_channel.provider_config['app_name']}")
     request.body = URI.encode_www_form({
-      channel: 'whatsapp',
-      source: source_number,
-      "src.name": whatsapp_channel.provider_config['app_name'],
-      destination: phone_number,
-      message: {
-        type: 'text',
-        text: message.content
-      }.to_json
-    })
+                                         channel: 'whatsapp',
+                                         source: source_number,
+                                         'src.name': whatsapp_channel.provider_config['app_name'],
+                                         destination: phone_number,
+                                         message: {
+                                           type: 'text',
+                                           text: message.content
+                                         }.to_json
+                                       })
     Rails.logger.info("Request: #{request.body}")
-    Rails.logger.info("Send ho gya message")
+    Rails.logger.info('Send ho gya message')
     process_request(uri, request)
   end
 
@@ -156,42 +153,41 @@ class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
                           caption: message.content
                         }
                       end
-  
+
     uri = URI(GUPSHUP_API_URL)
     request = Net::HTTP::Post.new(uri)
-    request["Content-Type"] = 'application/x-www-form-urlencoded'
-    request["accept"] = 'application/json'
-    request["apikey"] = whatsapp_channel.provider_config['api_key']
+    request['Content-Type'] = 'application/x-www-form-urlencoded'
+    request['accept'] = 'application/json'
+    request['apikey'] = whatsapp_channel.provider_config['api_key']
     source_number = whatsapp_channel.provider_config['source'].gsub(/\D/, '')
     Rails.logger.info("Source: #{source_number}")
     request.body = URI.encode_www_form({
-      channel: 'whatsapp',
-      source: source_number,
-      "src.name": whatsapp_channel.provider_config['app_name'],
-      destination: phone_number,
-      message: message_payload.to_json
-    })
-    Rails.logger.info("Send ho gya message")
+                                         channel: 'whatsapp',
+                                         source: source_number,
+                                         'src.name': whatsapp_channel.provider_config['app_name'],
+                                         destination: phone_number,
+                                         message: message_payload.to_json
+                                       })
+    Rails.logger.info('Send ho gya message')
     process_request(uri, request)
   end
-  
 
   def send_interactive_text_message(phone_number, message)
     uri = URI(GUPSHUP_API_URL)
     request = Net::HTTP::Post.new(uri)
-    request["Content-Type"] = 'application/x-www-form-urlencoded'
-    
-    request["apikey"] = whatsapp_channel.provider_config['api_key']
+    request['Content-Type'] = 'application/x-www-form-urlencoded'
+
+    request['apikey'] = whatsapp_channel.provider_config['api_key']
 
     request.body = URI.encode_www_form({
-      channel: 'whatsapp',
-      source: whatsapp_channel.provider_config['source'],
-      destination: phone_number,
-      message: {
-        type: 'interactive',
-        interactive: create_payload_based_on_items(message)
-      }.to_json
-    })
+                                         channel: 'whatsapp',
+                                         source: whatsapp_channel.provider_config['source'],
+                                         destination: phone_number,
+                                         message: {
+                                           type: 'interactive',
+                                           interactive: create_payload_based_on_items(message)
+                                         }.to_json
+                                       })
 
     process_request(uri, request)
   end
@@ -202,14 +198,14 @@ class Whatsapp::Providers::GupshupService < Whatsapp::Providers::BaseService
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     response = http.request(request)
-    Rails.logger.info("idhar pahuch gye")
+    Rails.logger.info('idhar pahuch gye')
     if response.code.to_i == 200
-      Rails.logger.info("Message successfull")
+      Rails.logger.info('Message successfull')
       JSON.parse(response.body)['messageId']
     else
       CUSTOM_LOGGER.info("Response: #{response.body}")
       nil
-      
+
     end
   end
 end

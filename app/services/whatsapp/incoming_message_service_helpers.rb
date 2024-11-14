@@ -12,7 +12,7 @@ module Whatsapp::IncomingMessageServiceHelpers
     }
   end
 
-  def processed_params 
+  def processed_params
     @processed_params ||= params
   end
 
@@ -90,15 +90,14 @@ module Whatsapp::IncomingMessageServiceHelpers
   def process_in_reply_to(message)
     if message[:context]&.key?('gsId')
       # Gupshup-specific context
-      if message[:type]=='sent'
-        external_id = message[:message_id]
-      else
-        external_id = message[:context]['gsId']
-      end
-      
-      
+      external_id = if message[:type] == 'sent'
+                      message[:message_id]
+                    else
+                      message[:context]['gsId']
+                    end
+
       @in_reply_to_external_id = external_id
-      
+
       @in_reply_to_external_id
 
     elsif message['context']&.[]('id')
@@ -125,27 +124,25 @@ module Whatsapp::IncomingMessageServiceHelpers
     message_id = if @processed_params.key?(:message_id)
                    @processed_params[:message_id]
                  else
-                   @processed_params[:messages]&.first[:id]
+                   @processed_params[:messages]&.first&.[](:id)
                  end
     return if message_id.blank?
-  
+
     # Format the Redis key and set it with expiration
     key = format(Redis::RedisKeys::MESSAGE_SOURCE_KEY, id: message_id)
     ::Redis::Alfred.setex(key, true)
   end
-  
 
   def clear_message_source_id_from_redis
     message_id = if @processed_params.key?(:message_id)
-                   @processed_params[:message_id] 
+                   @processed_params[:message_id]
                  else
-                   @processed_params[:messages]&.first[:id] 
+                   @processed_params[:messages]&.first&.[](:id)
                  end
-  
+
     return unless message_id
-  
+
     key = format(Redis::RedisKeys::MESSAGE_SOURCE_KEY, id: message_id)
     ::Redis::Alfred.delete(key)
   end
-  
 end
